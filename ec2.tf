@@ -2,7 +2,7 @@
 resource "aws_instance" "app" {
   ami                    = data.aws_ami.ubuntu.id
   instance_type          = var.instance_type_app
-  subnet_id              = data.aws_subnets.default.ids[0]
+  subnet_id              = data.aws_subnets.default.id
   vpc_security_group_ids = [aws_security_group.app_sg.id]
   key_name               = local.effective_key_name
   tags = {

@@ -12,6 +12,7 @@ locals {
   effective_key_name = var.key_name != "" ? var.key_name : try(aws_key_pair.deployer[0].key_name, null)
 }
 
+
 #Default VPC 
 data "aws_vpc" "default" {
   default = true
@@ -22,6 +23,10 @@ data "aws_subnets" "default" {
   filter {
     name   = "vpc-id"
     values = [data.aws_vpc.default.id]
+  }
+  filter {
+    name   = "default-for-az"
+    values = ["ap-south-1a", "ap-south-1b"]
   }
 }
 
