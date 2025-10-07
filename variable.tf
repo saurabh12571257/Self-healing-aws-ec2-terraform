@@ -7,7 +7,14 @@ variable "aws_region" {
 variable "key_name" {
   description = "EC2 Key pair name"
   type        = string
-  default     = file("id_rsa.pub")
+  default     = "id_rsa.pub"
+}
+
+variable "public_key_path" {
+  description = "Path to the public key"
+  type        = string
+  default     = "~/.ssh/id_rsa.pub"
+
 }
 
 variable "instance_type_app" {

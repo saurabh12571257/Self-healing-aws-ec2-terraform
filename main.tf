@@ -2,6 +2,11 @@ locals {
   app_name = "self-heal-demo"
 }
 
+resource "aws_key_pair" "key_name" {
+    count      = var.key_name == "" ? 1 : 0
+    key_name   = "${local.app_name}-key"
+    public_key = file(var.public_key_path)
+}
 # Determine key name to use
 locals {
   effective_key_name = var.key_name != "" ? var.key_name : (length(aws_key_pair.deployer) > 0 ? aws_key_pair.deployer[0].key_name : null)
@@ -54,3 +59,4 @@ resource "aws_security_group" "app_sg" {
     cidr_blocks = ["0.0.0.0/0"]
   }
 }
+
