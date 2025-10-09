@@ -36,3 +36,7 @@ data "aws_ami" "ubuntu" {
     values = ["ubuntu/images/hvm-ssd/ubuntu-jammy-22.04-amd64-server-*"]
   }
 }
+
+resource "random_id" "bucket_suffix" {
+  byte_length = 4
+}

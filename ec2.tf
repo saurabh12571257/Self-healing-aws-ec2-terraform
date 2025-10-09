@@ -75,37 +75,37 @@ resource "aws_instance" "monitor" {
 
             cat >/etc/prometheus/prometheus.yml <<PROM
             global:
-            scrape_interval: 10s
+                scrape_interval: 10s
 
 
             rule_files:
-            - "/etc/prometheus/alert.rules.yml"
+                - "/etc/prometheus/alert.rules.yml"
 
 
             alerting:
-            alertmanagers:
-            - static_configs:
-            - targets: ['localhost:9093']
+                alertmanagers:
+                    - static_configs:
+                        - targets: ['localhost:9093']
 
 
             scrape_configs:
-            - job_name: 'node_exporter_metrics'
-            static_configs:
-            - targets: ['${aws_instance.app.private_ip}:9100']
+                - job_name: 'node_exporter_metrics'
+                  static_configs:
+                    - targets: ['${aws_instance.app.private_ip}:9100']
             PROM
 
             cat >/etc/prometheus/alert.rules.yml <<RULES
             groups:
             - name: ec2-alerts
-            rules:
-            - alert: HighCPUUsage
-            expr: avg(rate(node_cpu_seconds_total{mode="user"}[2m])) by (instance) > 0.85
-            for: 2m
-            labels:
-            severity: critical
-            annotations:
-            summary: "High CPU usage detected on {{ $labels.instance }}"
-            description: "Instance CPU usage > 85% for 2 minutes"
+              rules:
+              - alert: HighCPUUsage
+                expr: avg(rate(node_cpu_seconds_total{mode="user"}[2m])) by (instance) > 0.85
+                for: 2m
+                labels:
+                  severity: critical
+                annotations:
+                  summary: "High CPU usage detected on {{ $labels.instance }}"
+                  description: "Instance CPU usage > 85% for 2 minutes"
             RULES
 
 
@@ -142,18 +142,18 @@ resource "aws_instance" "monitor" {
 
             cat >/etc/alertmanager/alertmanager.yml <<AM
             global:
-            resolve_timeout: 5m
+                resolve_timeout: 5m
 
 
             route:
-            receiver: 'lambda-webhook'
+                receiver: 'lambda-webhook'
 
 
             receivers:
             - name: 'lambda-webhook'
-            webhook_configs:
-            - url: '${aws_apigatewayv2_api.alert_webhook_api.api_endpoint}'
-            send_resolved: true
+              webhook_configs:
+              - url: '${aws_apigatewayv2_api.alert_webhook_api.api_endpoint}'
+                send_resolved: true
             AM
 
 
@@ -179,7 +179,6 @@ resource "aws_instance" "monitor" {
 
 
             EOF
-
 
   depends_on = [aws_instance.app, aws_apigatewayv2_api.alert_webhook_api]
 }
