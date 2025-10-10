@@ -54,6 +54,7 @@ import urllib.request
 
 
 EC2 = boto3.client('ec2')
+SLACK_WEBHOOK_URL = 'https://hooks.slack.com/services/XXXX'
 
 
 def lambda_handler(event, context):
@@ -92,6 +93,9 @@ def get_instance_id_by_private_ip(private_ip):
     except Exception as e:
         print(e)
     return None
+
+def notify_slack(message):
+    requests.post(SLACK_WEBHOOK_URL, json={"text": message})
 
 
 PY
