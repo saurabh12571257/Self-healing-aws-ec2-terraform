@@ -106,6 +106,14 @@ resource "aws_instance" "monitor" {
                 annotations:
                   summary: "High CPU usage detected on {{ $labels.instance }}"
                   description: "Instance CPU usage > 85% for 2 minutes"
+              - alert: InstanceDown
+                expr: up == 0
+                for: 1m
+                labels:
+                    severity: critical
+                annotations:
+                    description: "Instance {{ $labels.instance }} seems down."
+                    summary: "InstanceDown alert for {{ $labels.instance }}"
             RULES
 
 
