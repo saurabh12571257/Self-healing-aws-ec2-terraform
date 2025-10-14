@@ -77,8 +77,10 @@ def lambda_handler(event, context):
         if not instance_label:
             print(f"Alert missing instance label: {alert}")
             continue
-            
-        instance_id = get_instance_id_by_private_ip(instance_label)
+        
+        private_ip = instance_label.split(':')[0]
+
+        instance_id = get_instance_id_by_private_ip(private_ip)
         if instance_id:
             try:
                 EC2.reboot_instances(InstanceIds=[instance_id])
