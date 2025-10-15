@@ -99,7 +99,7 @@ resource "aws_instance" "monitor" {
             - name: ec2-alerts
               rules:
               - alert: HighCPUUsage
-                expr: avg(rate(node_cpu_seconds_total{mode="user"}[2m])) by (instance) > 0.85
+                expr: 100 - (avg by (instance) (rate(node_cpu_seconds_total{mode="idle"}[2m])) * 100) > 85
                 for: 2m
                 labels:
                   severity: critical
