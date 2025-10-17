@@ -15,7 +15,7 @@ resource "aws_apigatewayv2_integration" "lambda_integration" {
 resource "aws_apigatewayv2_route" "default_route" {
   api_id    = aws_apigatewayv2_api.alert_webhook_api.id
   route_key = "POST /alert"
-  target    = "integrations/${aws_apigatewayv2_integration.lambda_integration.id}"
+  target    = "integrations/${aws_apigatewayv2_integration.lambda_integration.id}/alert"
 }
 
 resource "aws_apigatewayv2_stage" "default" {

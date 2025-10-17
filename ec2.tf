@@ -160,7 +160,7 @@ resource "aws_instance" "monitor" {
             receivers:
             - name: 'lambda-webhook'
               webhook_configs:
-              - url: '${aws_apigatewayv2_api.alert_webhook_api.api_endpoint}'
+              - url: '${aws_apigatewayv2_api.alert_webhook_api.api_endpoint}/alert'
                 send_resolved: true
             AM
 

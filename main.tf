@@ -54,9 +54,11 @@ import boto3
 EC2 = boto3.client('ec2')
 
 def lambda_handler(event, context):
+    print("Received event:", json.dumps(event))
+
     body = event.get('body')
     
-    # Handle case where body is already a dict (direct Lambda invocation)
+    # Handle both cases — direct Lambda invocation or API Gateway event
     if isinstance(body, dict):
         payload = body
     else:
@@ -67,57 +69,77 @@ def lambda_handler(event, context):
             return {"statusCode": 400, "body": json.dumps({"error": "Invalid JSON payload"})}
     
     alerts = payload.get('alerts', [])
-    
     if not alerts:
+        print("No alerts found in payload")
         return {"statusCode": 400, "body": json.dumps({"error": "No alerts found"})}
     
     results = []
     for alert in alerts:
         instance_label = alert.get('labels', {}).get('instance', '')
         if not instance_label:
-            print(f"Alert missing instance label: {alert}")
+            print(f"Missing instance label in alert: {alert}")
             continue
         
         private_ip = instance_label.split(':')[0]
+        print(f"Processing instance with IP: {private_ip}")
 
         instance_id = get_instance_id_by_private_ip(private_ip)
         if instance_id:
             try:
-                EC2.reboot_instances(InstanceIds=[instance_id])
-                print(f"Rebooted instance {instance_id} (IP: {instance_label})")
-                results.append({"instance_id": instance_id, "status": "rebooted"})
+                # ✅ If the instance is stopped, start it instead of reboot
+                state = get_instance_state(instance_id)
+                if state == 'stopped':
+                    EC2.start_instances(InstanceIds=[instance_id])
+                    action = "started"
+                else:
+                    EC2.reboot_instances(InstanceIds=[instance_id])
+                    action = "rebooted"
+                
+                print(f"{action.capitalize()} instance {instance_id} (IP: {private_ip})")
+                results.append({"instance_id": instance_id, "status": action})
+            
             except Exception as e:
-                print(f"Reboot failed for {instance_id}: {e}")
+                print(f"Error operating on {instance_id}: {e}")
                 results.append({"instance_id": instance_id, "status": "failed", "error": str(e)})
         else:
-            print(f"No instance found for IP: {instance_label}")
-            results.append({"ip": instance_label, "status": "not_found"})
+            print(f"No instance found for IP: {private_ip}")
+            results.append({"ip": private_ip, "status": "not_found"})
     
     return {
-        "statusCode": 200, 
+        "statusCode": 200,
         "body": json.dumps({"message": "Processing complete", "results": results})
     }
 
 
 def get_instance_id_by_private_ip(private_ip):
-    """Get EC2 instance ID by private IP address"""
+    """Find EC2 instance ID by private IP"""
     if not private_ip:
         return None
-        
+    
     try:
-        resp = EC2.describe_instances(
+        response = EC2.describe_instances(
             Filters=[
                 {'Name': 'private-ip-address', 'Values': [private_ip]},
                 {'Name': 'instance-state-name', 'Values': ['running', 'stopped']}
             ]
         )
-        for reservation in resp.get('Reservations', []):
+        for reservation in response.get('Reservations', []):
             for instance in reservation.get('Instances', []):
-                return instance.get('InstanceId')
+                return instance['InstanceId']
     except Exception as e:
-        print(f"Error querying EC2 for IP {private_ip}: {e}")
-    
+        print(f"Error finding instance for IP {private_ip}: {e}")
     return None
+
+
+def get_instance_state(instance_id):
+    """Get current EC2 instance state"""
+    try:
+        response = EC2.describe_instances(InstanceIds=[instance_id])
+        return response['Reservations'][0]['Instances'][0]['State']['Name']
+    except Exception as e:
+        print(f"Error fetching state for {instance_id}: {e}")
+        return None
+
 
 def notify_slack(message):
     requests.post(SLACK_WEBHOOK_URL, json={"text": message})
