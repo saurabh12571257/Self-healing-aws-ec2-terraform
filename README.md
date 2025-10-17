@@ -34,14 +34,14 @@ It uses **Prometheus** for monitoring, **Alertmanager** for alerting, and **Terr
 
 ## 🧩 Project Flow
 
-**Prometheus (Monitor EC2)** <br>
+**Prometheus (Monitor EC2)** <br>        
                ↓<br>
-**Alert triggered (e.g., CPU > 85%)** <br>
+**Alert triggered (e.g., CPU > 85%)** <br>        
               ↓<br>
-**Alertmanager → POST /alert → API Gateway** <br>
+**Alertmanager → POST /alert → API Gateway** <br>        
                ↓<br>
-**API Gateway → invokes Lambda**<br>
+**API Gateway → invokes Lambda**<br>        
                ↓<br>
-**Lambda → identifies EC2 → reboots instance** <br>
+**Lambda → identifies EC2 → reboots instance** <br>        
                ↓<br>
 **EC2 rebooted automatically ✅**<br>
