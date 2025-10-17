@@ -35,27 +35,13 @@ It uses **Prometheus** for monitoring, **Alertmanager** for alerting, and **Terr
 ## 🧩 Project Flow
 
 Prometheus (Monitor EC2)
-↓
+- ↓
 Alert triggered (e.g., CPU > 85%)
-↓
+- ↓
 Alertmanager → POST /alert → API Gateway
-↓
+- ↓
 API Gateway → invokes Lambda
-↓
+- ↓
 Lambda → identifies EC2 → reboots instance
-↓
+- ↓
 EC2 rebooted automatically ✅
-
-
----
-
-## ⚙️ Setup Instructions
-
-### 1. Deploy the Monitoring Stack
-
-Run the following on your **monitor EC2** instance:
-
-- Install and start **Prometheus** and **Node Exporter**
-- Install **Alertmanager**
-
-Example rule (`/etc/prometheus/alert.rules.yml`):
