@@ -45,3 +45,8 @@ It uses **Prometheus** for monitoring, **Alertmanager** for alerting, and **Terr
 **Lambda → identifies EC2 → reboots instance** <br>        
 
 **EC2 rebooted automatically ✅**<br>
+
+---
+
+**Future Enhancements**
+   - Add Slack or Email notification.
